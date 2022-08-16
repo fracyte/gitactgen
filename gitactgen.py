@@ -94,23 +94,28 @@ if not args.y:
         print('Cancelled')
         quit()
 
-# Create directory (and remove previous in force mode)
+create_repo = True
 if os.path.isdir(args.output):
-    if not args.force:
-        print('Error: path already exists, use the force (-f) flag to overwrite existsting files')
-        quit()
+    if os.path.isdir(args.output + '/.git'):
+        create_repo = False
+        print('Adding commits to existing repository')
     else:
-        shutil.rmtree(args.output)
-os.makedirs(args.output)
+        if not args.force:
+            print('Error: path already exists, use the force (-f) flag to overwrite existsting files')
+            quit()
+        else:
+            shutil.rmtree(args.output)
+else:
+    os.makedirs(args.output)
 
 os.chdir(args.output)
 def run_cmd(cmd):
     subprocess.run(cmd, shell=True, check=True)
 
-# Init git
-run_cmd('git init --quiet')
-run_cmd('git config user.name {}'.format(args.git_name))
-run_cmd('git config user.email {}'.format(args.git_email))
+if create_repo:
+    run_cmd('git init --quiet')
+    run_cmd('git config user.name {}'.format(args.git_name))
+    run_cmd('git config user.email {}'.format(args.git_email))
 
 # Start on first sunday of year
 first_doy = datetime.date(args.year, 1, 1)
